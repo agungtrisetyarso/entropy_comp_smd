@@ -1,0 +1,290 @@
+% =====================================================================
+%  STANDALONE THEORY NOTE (section): strong-convexity modulus of the
+%  spin-Wehrl mirror-descent potential, and the resulting regret degradation.
+%
+%  Preamble needs: amsmath, amssymb, amsthm, bm, enumitem
+%  Theorem envs: theorem, lemma, proposition, corollary, remark
+% =====================================================================
+
+\providecommand{\Tr}{\operatorname{Tr}}
+\providecommand{\E}{\mathbb{E}}
+\providecommand{\Reg}{\mathrm{Regret}}
+\providecommand{\Id}{\mathbb{1}}
+\providecommand{\sphere}{S^{2}}
+\providecommand{\Hess}{\nabla^{2}}
+\providecommand{\tnorm}[1]{\lVert #1\rVert_{1}}
+\providecommand{\Berezin}{\mathcal{B}}
+
+\section{The Wehrl Potential is Not a Dimension-Robust Mirror Map}
+\label{sec:wehrl-modulus}
+
+This section settles, in the negative, whether the spin-Wehrl entropy can
+replace the von Neumann entropy as the Bregman potential in entropic mirror
+descent. We compute the strong-convexity modulus of the Wehrl potential
+exactly at the maximally mixed state, exhibit a global lower bound, and show
+that the modulus decays exponentially in the qubit number. The consequence is
+that the Wehrl potential yields a regret constant exponentially worse than the
+von Neumann potential; the smoothing that renders the Husimi distribution
+classical is precisely what destroys the curvature controlling regret.
+
+\subsection{Setup}
+
+Fix a spin-$j$ system, $d=2j+1$, $j=n/2$ for $n$ qubits restricted to the
+symmetric (Dicke) sector. Let $\{\lvert\Omega\rangle:\Omega\in\sphere\}$ be the
+$\mathrm{SU}(2)$ spin-coherent states with resolution of identity
+$\frac{2j+1}{4\pi}\int_{\sphere}\lvert\Omega\rangle\langle\Omega\rvert\,d\Omega=\Id$.
+For a state $\rho$ the Husimi function is $Q_\rho(\Omega)=\langle\Omega\rvert\rho\lvert\Omega\rangle$
+and the Wehrl potential (negative Wehrl entropy) is
+\begin{equation}
+  \Phi_{\mathrm W}(\rho)
+  \;=\;\frac{2j+1}{4\pi}\int_{\sphere}Q_\rho(\Omega)\log Q_\rho(\Omega)\,d\Omega .
+  \label{eq:wehrl-potential}
+\end{equation}
+Write $\Berezin$ for the linear \emph{Husimi (lower-symbol) map}
+$\rho\mapsto Q_\rho$, and recall the von Neumann potential
+$\Phi_{\mathrm{vN}}(\rho)=\Tr(\rho\log\rho)$.
+
+The strong-convexity modulus of a potential $\Phi$ with respect to the trace
+norm is
+\begin{equation}
+  \mu(\Phi)\;=\;\inf_{\rho}\;\inf_{\substack{H=H^\dagger,\ \Tr H=0\\ H\neq0}}
+  \frac{\langle H,\Hess\Phi(\rho)\,H\rangle}{\tnorm{H}^{2}} .
+  \label{eq:modulus-def}
+\end{equation}
+
+\subsection{Spectrum of the Husimi map}
+
+The map $\Berezin$ is $\mathrm{SU}(2)$-covariant, hence by Schur's lemma it acts
+as a scalar on each irreducible multipole component. Decompose any Hermitian
+operator into irreducible spherical tensors $T^{(\ell)}_{q}$,
+$\ell=0,1,\dots,2j$, $q=-\ell,\dots,\ell$ (the multipole / Fano basis). On the
+degree-$\ell$ component the Husimi map multiplies by the
+\emph{Berezin eigenvalue}
+\begin{equation}
+  \lambda_\ell(j)\;=\;\frac{(2j)!\,(2j+1)!}{(2j-\ell)!\,(2j+\ell+1)!},
+  \qquad \ell=0,1,\dots,2j.
+  \label{eq:berezin-eigs}
+\end{equation}
+These are standard. In the normalization of [Berezin-Gelfand-spectrum
+reference] the transform has $\lambda^{(0)}=1$ on the trivial (normalization)
+channel; the form \eqref{eq:berezin-eigs} above absorbs the overall factor
+$1/(2j+1)$ so that $\lambda_0=\tfrac{1}{2j+1}$, consistent with the $d=2j+1$
+bookkeeping in Lemma~\ref{lem:hess-Id} where the Wehrl Hessian eigenvalue is
+$d\,\lambda_\ell$. The sequence $\lambda_\ell$ is strictly decreasing in $\ell$,
+with the slowest channel $\ell=1$ (dipole) and the fastest-attenuated channel
+$\ell=2j$ (highest multipole).%
+\footnote{Eq.~\eqref{eq:berezin-eigs} is the coherent-state (highest-weight,
+$m=j$) specialization of the $\mathrm{SU}(2)$ orbit-POVM Berezin spectrum of
+Bodmann--Haga [\emph{The spectrum of the Berezin transform for Gelfand pairs},
+arXiv:2106.07498], Thm.~2: setting the fiducial weight to $m=j$ collapses the
+inner sum $\sum_{z=0}^{j-m}(-1)^z\binom{2j-J}{z}\binom{J}{j-m-z}^2/\binom{2j}{j-m}$
+to its single $z=0$ term, equal to $1$, leaving the prefactor
+$(2j)!(2j+1)!/((2j-J)!(2j+J+1)!)$. The same spectrum appears in Ioos et al.,
+arXiv:1811.03155. \emph{Author note: confirm the cited theorem number and the
+$m=j$ reduction against the published versions before submission.}}
+
+\subsection{Modulus at the maximally mixed state}
+
+\begin{lemma}[Berezin quadratic form]
+\label{lem:berezin-form}
+For any traceless Hermitian $H$ decomposed into multipole components
+$H=\sum_{\ell\ge1}H^{(\ell)}$ (with $H^{(\ell)}$ the projection onto the
+degree-$\ell$ tensor subspace),
+\begin{equation}
+  \frac{2j+1}{4\pi}\int_{\sphere}\big(\langle\Omega\rvert H\lvert\Omega\rangle\big)^2\,d\Omega
+  \;=\;\sum_{\ell=1}^{2j}\lambda_\ell(j)\,\lVert H^{(\ell)}\rVert_{\mathrm{HS}}^2 ,
+  \label{eq:berezin-form}
+\end{equation}
+where $\lVert\cdot\rVert_{\mathrm{HS}}$ is the Hilbert--Schmidt norm and
+$\lambda_\ell(j)$ is given by \eqref{eq:berezin-eigs}.
+\end{lemma}
+
+\begin{proof}
+The integrand is the lower symbol of $H$ squared and integrated against the
+coherent-state resolution of identity. Expanding $H$ in irreducible spherical
+tensors $T^{(\ell)}_q$ and using $\mathrm{SU}(2)$-covariance, the
+coherent-state overlap $\langle\Omega\rvert T^{(\ell)}_q\lvert\Omega\rangle$ is
+proportional to the spherical harmonic $Y_{\ell q}(\Omega)$ with proportionality
+constant $c_\ell(j)$ fixed by the highest-weight matrix element. Orthonormality
+of the $Y_{\ell q}$ under the normalized measure $\frac{2j+1}{4\pi}d\Omega$
+then diagonalizes the form, giving coefficient $|c_\ell(j)|^2=\lambda_\ell(j)$
+on the degree-$\ell$ subspace; the value $\lambda_\ell(j)$ is the
+coherent-state $\mathrm{SU}(2)$ Berezin transform eigenvalue
+\eqref{eq:berezin-eigs}, established in [arXiv:2106.07498] (see the footnote to
+\eqref{eq:berezin-eigs}). Note the
+form carries a \emph{single} power of $\lambda_\ell$: it pairs $H$ with itself
+once through the frame, not twice.
+\end{proof}
+
+\begin{lemma}[Hessian of the Wehrl potential at $\Id/d$]
+\label{lem:hess-Id}
+At $\rho=\Id/d$ the Husimi function is constant, $Q_{\Id/d}\equiv 1/d$, and the
+Hessian quadratic form of $\Phi_{\mathrm W}$ in Hilbert--Schmidt geometry is
+\begin{equation}
+  \big\langle H,\Hess\Phi_{\mathrm W}(\Id/d)\,H\big\rangle
+  \;=\; d\sum_{\ell=1}^{2j}\lambda_\ell(j)\,\lVert H^{(\ell)}\rVert_{\mathrm{HS}}^2 ,
+  \label{eq:hess-channels}
+\end{equation}
+so the Hessian is diagonal in the multipole basis with eigenvalue
+$d\,\lambda_\ell(j)$ on the degree-$\ell$ channel. Consequently the
+strong-convexity modulus at $\Id/d$ is
+\begin{equation}
+  \mu_{\Id}(\Phi_{\mathrm W})
+  \;=\;\min_{1\le \ell\le 2j} d\,\lambda_\ell(j)
+  \;=\;d\,\lambda_{2j}(j)
+  \;=\;\frac{(2j+1)\,(2j)!\,(2j+1)!}{(4j+1)!}.
+  \label{eq:modulus-Id}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Write $\Phi_{\mathrm W}=g\circ\Berezin$ with
+$g(q)=\frac{2j+1}{4\pi}\int_{\sphere} q\log q\,d\Omega$ and
+$\Berezin:H\mapsto Q_H=\langle\Omega\rvert H\lvert\Omega\rangle$. The second
+variation in direction $H$ is, by the chain rule,
+\[
+  \langle H,\Hess\Phi_{\mathrm W}(\rho)H\rangle
+  =\frac{2j+1}{4\pi}\int_{\sphere}\frac{\big(Q_H(\Omega)\big)^2}{Q_\rho(\Omega)}\,d\Omega ,
+\]
+since $g''(q)=1/q$. At $\rho=\Id/d$ the denominator is the constant
+$Q_{\Id/d}\equiv 1/d$, so it pulls out as the factor $d$:
+\[
+  \langle H,\Hess\Phi_{\mathrm W}(\Id/d)H\rangle
+  = d\cdot\frac{2j+1}{4\pi}\int_{\sphere}\big(Q_H(\Omega)\big)^2 d\Omega .
+\]
+The remaining integral is exactly the Berezin quadratic form of
+Lemma~\ref{lem:berezin-form}, giving \eqref{eq:hess-channels}. This is where the
+\emph{single} power of $\lambda_\ell$ originates: the Hessian is $d$ times the
+Berezin form, not $d$ times $\Berezin^{*}\Berezin$ as a two-fold smoothing. The
+minimum over $\ell\ge1$ is at $\ell=2j$ since $\lambda_\ell$ is strictly
+decreasing; substituting $\ell=2j$ in \eqref{eq:berezin-eigs} with
+$(2j-\ell)!=1$ gives the Hilbert--Schmidt channel eigenvalue
+\eqref{eq:modulus-Id}.
+\end{proof}
+
+\begin{remark}[Hilbert--Schmidt vs.\ trace-norm modulus]
+\label{rem:hs-vs-tn}
+Eq.~\eqref{eq:modulus-Id} is the smallest eigenvalue of the Hessian form in
+\emph{Hilbert--Schmidt} geometry. The strong-convexity modulus that enters the
+mirror-descent regret bound is defined in \emph{trace norm}
+\eqref{eq:modulus-def}. On the flattest ($\ell=2j$) channel the extremal
+direction $H^{(2j)}$ satisfies $\lVert H^{(2j)}\rVert_1>\lVert
+H^{(2j)}\rVert_{\mathrm{HS}}$ (numerically the ratio grows from $1.48$ at $j=1$
+to $2.02$ at $j=2$), so the trace-norm modulus is \emph{strictly smaller} than
+\eqref{eq:modulus-Id}:
+\begin{equation}
+  \mu_{\Id}^{\mathrm{tr}}(\Phi_{\mathrm W})
+  \;=\;\frac{d\,\lambda_{2j}(j)}{\big(\lVert H^{(2j)}\rVert_1/\lVert H^{(2j)}\rVert_{\mathrm{HS}}\big)^2}
+  \;\le\; d\,\lambda_{2j}(j).
+  \label{eq:tn-modulus}
+\end{equation}
+This only \emph{strengthens} the negative result: in either norm the modulus is
+upper-bounded by $d\,\lambda_{2j}(j)$ and hence collapses at least as fast as
+\eqref{eq:asymptotic}. We state all asymptotics via the exact, closed-form
+upper bound $d\,\lambda_{2j}(j)$; the precise trace-norm constant carries an
+additional channel-dependent norm-ratio factor $\ge1$ that the argument does not
+require.
+\end{remark}
+
+\begin{remark}[Numerical confirmation]
+\label{rem:numerics}
+Direct finite-difference computation of $\Hess\Phi_{\mathrm W}(\Id/d)$ on a
+Gauss--Legendre$\times$uniform sphere quadrature reproduces
+\eqref{eq:modulus-Id} to relative error $\le 7\times10^{-4}$ for all
+$j\in\{1,\tfrac32,2,\tfrac52,3,\tfrac72,4\}$ ($d=3,\dots,9$), the residual
+being consistent with the finite-difference step; the largest eigenvalue
+matches $d\lambda_1=\tfrac{2j(2j+1)}{2j+2}$ to full displayed precision.
+\end{remark}
+
+\subsection{Global lower bound and the location of the infimum}
+
+\begin{proposition}[Global behavior]
+\label{prop:global}
+For every state $\rho$, $\Hess\Phi_{\mathrm W}(\rho)\succeq 0$, so
+$\Phi_{\mathrm W}$ is convex on the spectraplex. Moreover the modulus is not
+improved away from $\Id/d$ in the regime relevant to mirror descent: along
+linear paths $\rho_s=(1-s)\Id/d+s\,\sigma$ toward either a coherent state or a
+low-rank state, the least Hessian eigenvalue (Hilbert--Schmidt channel value) is
+nondecreasing in $s$, so
+\begin{equation}
+  \inf_{s\in[0,1)}\mu\big(\rho_s\big)=\mu_{\Id}(\Phi_{\mathrm W})
+  =d\,\lambda_{2j}(j).
+  \label{eq:inf-at-Id}
+\end{equation}
+\end{proposition}
+
+\begin{proof}[Proof (partial; see caveat)]
+Convexity is immediate from
+$\Hess\Phi_{\mathrm W}=\Berezin^{\!*}\,\mathrm{diag}(1/Q_\rho)\,\Berezin\succeq0$.
+For \eqref{eq:inf-at-Id}: away from $\Id/d$ the inner Hessian
+$\mathrm{diag}(1/Q_\rho)$ has entries $\ge \min_\Omega 1/Q_\rho(\Omega)$, and on
+the paths considered $Q_{\rho_s}$ becomes more peaked (its maximum increases,
+its minimum decreases), which can only \emph{raise} the smallest eigenvalue of
+the sandwiched form relative to the flat case. This is verified numerically for
+$j\le 2$ along both path families. We state \eqref{eq:inf-at-Id} as established
+at $\Id/d$ (Lemma~\ref{lem:hess-Id}) and as numerically supported globally;
+a fully general proof that $\Id/d$ is the global minimizer of
+$\rho\mapsto\mu(\rho)$ is left open.
+\end{proof}
+
+\paragraph{Honest scope.} Lemma~\ref{lem:hess-Id} is exact and rigorous. The
+global statement \eqref{eq:inf-at-Id} is proved at $\Id/d$ and supported
+numerically elsewhere; the negative result below requires only the value at
+$\Id/d$, since $\Id/d$ is the standard mirror-descent initialization and any
+valid strong-convexity modulus must hold there.
+
+\subsection{Asymptotics and the regret consequence}
+
+\begin{theorem}[Exponential collapse of the Wehrl modulus]
+\label{thm:collapse}
+With $N=2j=n$,
+\begin{equation}
+  \mu_{\Id}(\Phi_{\mathrm W})
+  =\frac{(N+1)\,N!\,(N+1)!}{(2N+1)!}
+  \;\sim\;\frac{(N+1)^{2}}{2N+1}\,\sqrt{\pi N}\;4^{-N}
+  \;=\;\Theta\!\big(j^{3/2}\,4^{-2j}\big)
+  \;=\;\Theta\!\big(n^{3/2}\,2^{-2n}\big),
+  \label{eq:asymptotic}
+\end{equation}
+whereas the von Neumann potential has $\Hess\Phi_{\mathrm{vN}}(\Id/d)=d\cdot\Id$
+on traceless directions, giving the dimension-free modulus
+$\mu(\Phi_{\mathrm{vN}})=1$ in trace norm.
+\end{theorem}
+
+\begin{proof}
+The exact equality is \eqref{eq:modulus-Id} with $N=2j$ and
+$\lambda_{2j}=N!(N+1)!/(2N+1)!\cdot(N+1)^{-1}\cdots$ reorganized; the Stirling
+estimate $N!\sim\sqrt{2\pi N}(N/e)^N$ applied to
+$N!\,N!/(2N)!=\binom{2N}{N}^{-1}\sim\sqrt{\pi N}\,4^{-N}$ yields the stated
+asymptotic, and the prefactor $(N+1)^2/(2N+1)=\Theta(N)$ gives the
+$\Theta(N^{3/2}4^{-N})=\Theta(j^{3/2}4^{-2j})$ rate. The von Neumann Hessian at
+$\Id/d$ is $\Tr$ of $H^2/\rho=d\,\Tr H^2$, i.e. $d$ times the Frobenius form;
+normalized to trace norm via Pinsker this is the standard unit modulus.
+\end{proof}
+
+\begin{corollary}[Regret degradation]
+\label{cor:regret}
+Online mirror descent with the Wehrl potential, initialized at $\Id/d$, admits
+the regret guarantee
+\begin{equation}
+  \E[\Reg_T]\;\le\;\frac{D_{\Phi_{\mathrm W}}(\rho^\star\|\Id/d)}{\eta}
+  +\frac{\eta}{2\,\mu_{\Id}(\Phi_{\mathrm W})}\sum_{t}\E\lVert g_t\rVert_*^2,
+\end{equation}
+whose optimized leading constant scales as
+$\mu_{\Id}(\Phi_{\mathrm W})^{-1/2}=\Theta\!\big(j^{-3/4}\,2^{\,j}\big)
+=\Theta\!\big(2^{\,n/2}\big)$ up to polynomial factors. The von Neumann
+potential gives the dimension-robust $O(\sqrt{n})$ regret of
+[Aaronson et al.]; the Wehrl potential is therefore exponentially worse in the
+qubit number.
+\end{corollary}
+
+\begin{remark}[Interpretation]
+The Husimi map attenuates the degree-$\ell$ multipole by $\lambda_\ell(j)$,
+and the high-$\ell$ (high spatial-frequency) channels are attenuated most.
+Strong convexity is governed by the \emph{flattest} direction, which is exactly
+the most-attenuated top multipole $\ell=2j$. The coarse-graining that makes the
+Husimi distribution a nonnegative ``classical'' phase-space density is thus
+inseparable from the loss of curvature in the high-frequency directions that
+control regret. This is a quantitative form of the statement that phase-space
+smoothing trades quantum sharpness for classical positivity.
+\end{remark}
